@@ -6,9 +6,9 @@ from pathlib import PosixPath
 import pandas as pd
 import toml
 import xlrd
-from parse import parse
 from loguru import logger
 from openpyxl import load_workbook
+from parse import parse
 
 GEOGRAPHY_CODE_LEN = 9  # Length of geo code, eg E06000047
 

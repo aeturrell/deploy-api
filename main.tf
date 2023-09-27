@@ -11,7 +11,7 @@ terraform {
 provider "google" {
     project = var.project_id
     region = var.region
-    //credentials = file(var.credentials) #use this if you don't want to set env-var GOOGLE_APPLICATION
+    credentials = file("secrets/google_key.json")
 }
 
 # Artifact registry for containers
