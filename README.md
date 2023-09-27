@@ -191,7 +191,7 @@ Done.
 
 ## Here's one I built earlier!
 
-You can see the running version here: [https://app-qdvgjvqwza-nw.a.run.app](https://app-qdvgjvqwza-nw.a.run.app)
+You can see the running version here: [https://app-qdvgjvqwza-nw.a.run.app](https://app-qdvgjvqwza-nw.a.run.app). You can find [the docs here](https://app-qdvgjvqwza-nw.a.run.app/docs). And [here's an example that returns data](http://0.0.0.0:8080/year/2021/geo_code/E08000007). Note that one constraint of Cloud Run is that it takes a moment to start if no-one has used the link for a while.
 
 ## Final Thoughts
 
