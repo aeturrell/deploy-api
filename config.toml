@@ -1,0 +1,3 @@
+downloads_location = "scratch/"
+min_year = 2015
+name_of_data_file = "deaths_data.parquet"
