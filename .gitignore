@@ -1,3 +1,4 @@
+requirements.txt
 terraform.tfvars
 .DS_Store
 scratch/*
