@@ -1,6 +1,6 @@
 # deploy-api
 
-An example API deployment. The project makes use of Google Cloud, Terraform, and FastAPI.
+An example API deployment using Google Cloud, Terraform, and FastAPI.
 
 Google Cloud provides a place to stow containers and a way to deploy the API. FastAPI is a package that makes writing astoundingly high-quality APIs embarrassingly quick. Terraform is a tool that helps you do "infrastructure as code", ie to build, change, and version control cloud resources safely and efficiently.
 
@@ -8,7 +8,7 @@ Google Cloud provides a place to stow containers and a way to deploy the API. Fa
 
 ### First Steps
 
-Download and install [terraform](https://developer.hashicorp.com/terraform/downloads). Do the same for [poetry](https://python-poetry.org/) and ensure you have a version of Python installed.
+Download and install [terraform](https://developer.hashicorp.com/terraform/downloads). Do the same for [poetry](https://python-poetry.org/) and ensure you have a Python installation (this tutorial uses Python 3.10 and that version is baked into the `pyproject.toml` file).
 
 If you've cloned this repository, the `.gitignore` file has a lot of useful bits in already that will help protect information you do not want to share with others.
 
@@ -24,7 +24,7 @@ We're now going to create a project on the command line.
 gcloud projects create YOUR-PROJECT-ID
 ```
 
-You may wish to add some numbers to the end of the project name to ensure it is unique. (Note that it needs to be the same as the project ID in your `terraform.tfvars` file, which we'll come to later.)
+You may wish to add some numbers to the end of the project name to ensure it is unique, as most obvious names are already taken. (Note that you will need to set the same project ID in your `terraform.tfvars` file, which we'll come to later.)
 
 Next up, switch the Google Cloud CLI to use this specific project:
 
@@ -34,9 +34,9 @@ gcloud config set project YOUR-PROJECT-ID
 
 Now we have to go to the [Google Cloud Console](https://console.cloud.google.com/). Navigate to the relevant project, and then create a new Service Account under IAM. The current [URL is here](https://console.cloud.google.com/iam-admin/serviceaccounts). A service account can be used to manage access to Google Cloud services.
 
-In the new service account, click on Actions then Manage keys. Create a new key which will be downloaded as a JSON file—do not put it under version control, but do safe it in the `secrets` subdirectory with the name `google_key.json`.
+In the new service account, click on Actions then Manage keys. Create a new key which will be downloaded as a JSON file—do not put it under version control! If you're following this tutorial closely, you can put it in the `secrets` subdirectory with the name `google_key.json` because the contents of this folder are not under version control.
 
-You'll also need to set up billing, which can be found under billing.
+You'll also need to set up billing, which can be found under Billing in the left-hand side navigation pane.
 
 ### Terraforming Google Cloud Components
 
@@ -48,6 +48,8 @@ Terraform is a cross-cloud provider way of specifying resources. We're going to 
 2. provider region and project information
 3. a block representing the container registry API
 4. (last two blocks) code that enables the registry and cloud run APIs
+
+One of the slightly confusing things about terraform is that it works out what order to apply these changes in itself, so we don't have to worry about the fact that the blocks enabling APIs come after the blocks creating new resources under specific APIs.
 
 `.terraform.version` contains the version of terraform you're using (run `terraform --version` to check).
 
@@ -79,17 +81,17 @@ gcloud services enable artifactregistry.googleapis.com
 gcloud services enable run.googleapis.com
 ```
 
-You can check what services you have enabled with `gcloud services list --enabled`.
+You can check what services you have enabled with `gcloud services list --enabled`. If you're doing a huge project and want to filter, you can of course `grep` your way to the info you're interested in, eg `gcloud services list --enabled | grep run` to check whether `run.googleapis.com` is on the list.
 
 ## Python and the API
 
 ### Setup
 
-Run `poetry config virtualenvs.in-project true` to make virtual environments be installed in the local project folder.
+Run `poetry config virtualenvs.in-project true` to make virtual environments be installed in the local project folder. (Note that this doesn't always play nicely with conda; there's an [open Poetry issue about this](https://github.com/python-poetry/poetry/issues/4055) but it *did* seem to work when in the `base` environment of conda.)
 
 Run `poetry install` to install the Python env.
 
-Note that, for reasons of good practice, this repository uses `pre-commit`. You can run this using `poetry run pre-commit run --all-files`.
+Note that, for reasons of good practice and high code quality, this repository uses `pre-commit`. You can run this using `poetry run pre-commit run --all-files`.
 
 ### Prepping the data
 
@@ -102,7 +104,7 @@ There are a few Python scripts in a folder called `etl`. These perform the follo
   - New data may be added in a new file, if the new data refer to January, or added into an existing file, if the month they refer to is not January
 - `etl/main.py` — this is a script that calls the extract and transform scripts in order.
 
-To create the data we'll be serving up later, it's
+NB: there isn't any "load" here, and we're not using a database to store data. That's because we want to keep this to a minimal deployment just of an API, and because the data are small. However, it wouldn't be too much work to integrate a database too. To create the data we'll be serving up later, it's
 
 ```bash
 poetry run python etl/main.py
@@ -191,10 +193,10 @@ Done.
 
 ## Here's one I built earlier!
 
-You can see the running version here: [https://app-qdvgjvqwza-nw.a.run.app](https://app-qdvgjvqwza-nw.a.run.app). You can find [the docs here](https://app-qdvgjvqwza-nw.a.run.app/docs). And [here's an example that returns data](http://0.0.0.0:8080/year/2021/geo_code/E08000007). Note that one constraint of Cloud Run is that it takes a moment to start if no-one has used the link for a while.
+You can see the running version here: [https://app-qdvgjvqwza-nw.a.run.app](https://app-qdvgjvqwza-nw.a.run.app). You can find [the docs here](https://app-qdvgjvqwza-nw.a.run.app/docs). And [here's an example that returns data](https://app-qdvgjvqwza-nw.a.run.app/year/2021/geo_code/E08000007). Note that one constraint of Cloud Run is that it takes a moment to start if no-one has used the link for a while.
 
 ## Final Thoughts
 
-The commoditisation of cloud services, and the great developments in Python as a language, have made it far, far easier to create APIs. Although there are a few components to get your head around here, it's amazing how quickly you can create a working API.
+The commoditisation of cloud services, and the great developments in Python as a language, have made it far, far easier to create high quality APIs. Although there are a few components to get your head around here, it's amazing how quickly you can create a working API.
 
 It's worth noting that, if all your API is doing is serving up tabular data, there's a much easier way to to this (even though building an API with FastAPI is so easy). You can use the excellent [datasette](https://datasette.io/). You can see a worked example of using it to [serve up some data here](https://github.com/aeturrell/datasette_particulate_matter). It seems like FastAPI would be much more useful with more unusually structured data, when you need to interact with data by writing as well as reading, or when you need cloud run to do other activities too (like pull from a Google database). NB: you could configure GitHub Actions to update a datasette instance, so simply updating a database on a schedule is entirely possible with datasette.
